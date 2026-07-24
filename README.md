@@ -1,15 +1,15 @@
 # tg2fa - Vaultwarden + Telegram 2FA bridge
 
-*tg2fa* is a small service that acts as glue between Vaultwarden and Telegram, so Telegram can be used as the second factor. It receives
+**tg2fa** is a small service that acts as glue between Vaultwarden and Telegram, so Telegram can be used as the second factor. It receives
 login requests, sends an approval prompt to Telegram, and returns the one-time code only after the request is approved.
 
 ## Licensing
 
-Dual-licensed under the *MIT* and *Apache License 2.0*. See [LICENSE](LICENSE) file.
+Dual-licensed under the **MIT** and **Apache License 2.0**. See [LICENSE](LICENSE) file.
 
 ## Vaultwarden modifications
 
-*TODO*
+**TODO**
 
 ## Intended deployment
 
@@ -17,7 +17,7 @@ This service is meant to run with the provided `compose.yaml`.
 
 - `tg2fa:8080` handles **Telegram webhooks**
 - `tg2fa:9090` is the **internal auth API**
-- *tg2fa* itself does **not** do TLS termination
+- **tg2fa** itself does **not** do TLS termination
 - TLS should be terminated by **Traefik**
 
 Important:
@@ -90,7 +90,7 @@ touch .data/acme/acme.json .data/vaultwarden.env
 chmod 600 .data/acme/acme.json
 ```
 
-Create the *tg2fa* env file:
+Create the **tg2fa** env file:
 
 ```bash
 cat > .data/tg2fa.env <<'EOF'
@@ -115,11 +115,11 @@ Compose behavior:
 
 - Traefik publishes `80` and `443`
 - Vaultwarden is exposed through Traefik on `https://${DOMAIN}/`
-- *tg2fa* webhook is exposed through Traefik on `https://${DOMAIN}/_tg2fa/`
+- **tg2fa** webhook is exposed through Traefik on `https://${DOMAIN}/_tg2fa/`
 
 ## Traefik and exposed ports
 
-- *tg2fa* serves plain HTTP only; it expects Traefik to handle HTTPS
+- **tg2fa** serves plain HTTP only; it expects Traefik to handle HTTPS
 - if you keep the provided route, Telegram should call `https://example.com/_tg2fa/`
 - do not publish `9090` with a `ports:` mapping
 - only the Traefik entrypoint should be reachable from outside
@@ -130,7 +130,7 @@ Compose behavior:
 - `POST /request` - submit a login request and send it to Telegram
 - `POST /validate` - validate the approved code
 
-There is a small request example in `test.http`.
+There is a small request example in [test.http](test.http) file.
 
 ## References
 
