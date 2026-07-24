@@ -3,6 +3,10 @@
 *tg2fa* is a small service that acts as glue between Vaultwarden and Telegram, so Telegram can be used as the second factor. It receives
 login requests, sends an approval prompt to Telegram, and returns the one-time code only after the request is approved.
 
+## Licensing
+
+Dual-licensed under the *MIT* and *Apache License 2.0*. See [LICENSE](LICENSE) file.
+
 ## Vaultwarden modifications
 
 *TODO*
