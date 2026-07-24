@@ -1,0 +1,24 @@
+### Test auth request
+POST http://localhost:9090/request
+Content-Type: application/json
+
+{
+  "id": "{{$random.uuid}}",
+  "meta_data": {
+    "username": "user@example.com",
+    "device_name": "Bitwarden desktop",
+    "ip_addr": "{{ip_addr}}"
+  },
+  "second_factor_data": {
+    "id": {{telegram_user_id}}
+  }
+}
+
+### Test validate request
+POST http://localhost:9090/validate
+Content-Type: application/json
+
+{
+  "id": "{{$random.uuid}}",
+  "code": "123456"
+}

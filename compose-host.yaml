@@ -1,0 +1,104 @@
+services:
+
+  traefik:
+    image: "traefik:3.7"
+    container_name: traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.buff.buffering.maxRequestBodyBytes=10485760 # 10 MiB
+      - traefik.http.middlewares.buff.buffering.memRequestBodyBytes=2097152 # 2 MiB
+      - traefik.http.middlewares.buff.buffering.maxResponseBodyBytes=10485760 # 10 MiB
+      - traefik.http.middlewares.buff.buffering.memResponseBodyBytes=2097152 # 2 MiB
+      - traefik.http.middlewares.buff.buffering.retryExpression=IsNetworkError() && Attempts() < 2
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.tlsChallenge.tls=true
+      - --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json
+    environment:
+      ACME_AGREE: "true"
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    volumes:
+      - ${PWD}/.data/acme:/etc/traefik/acme
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - service
+    restart: unless-stopped
+
+  vaultwarden:
+    image: vaultwarden/server:1.36.0
+    container_name: vaultwarden
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.vaultwarden.rule=Host(`${DOMAIN}`) && PathPrefix(`/`)
+      - traefik.http.routers.vaultwarden.middlewares=buff@docker
+      - traefik.http.routers.vaultwarden.service=vaultwarden
+      - traefik.http.services.vaultwarden.loadbalancer.server.port=8080
+      - traefik.http.routers.vaultwarden.entrypoints=websecure
+      - traefik.http.routers.vaultwarden.tls.certresolver=letsencrypt
+    env_file:
+      - ${PWD}/.data/vaultwarden.env
+    environment:
+      DOMAIN: "https://${DOMAIN}/"
+      ROCKET_PORT: "8080"
+      ENABLE_EXT2FA: "true"
+      EXT2FA_URL: "http://tg2fa:9090/"
+      HTTP_REQUEST_BLOCK_NON_GLOBAL_IPS: "false"
+    volumes:
+      - ${PWD}/.data/vaultwarden:/data
+    networks:
+      - service
+    restart: unless-stopped
+
+  tg2fa:
+    container_name: tg2fa
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tg2fa.rule=Host(`${DOMAIN}`) && PathPrefix(`/_tg2fa`)
+      - traefik.http.routers.tg2fa.middlewares=buff@docker
+      - traefik.http.routers.tg2fa.service=tg2fa
+      - traefik.http.services.tg2fa.loadbalancer.server.port=8080
+      - traefik.http.routers.tg2fa.entrypoints=websecure
+      - traefik.http.routers.tg2fa.tls.certresolver=letsencrypt
+    env_file:
+      - ${PWD}/.data/tg2fa.env
+    environment:
+      TELEGRAM_HOST_URL: "https://${DOMAIN}/_tg2fa/"
+      VALKEY_SERVER: "redis://valkey:6379"
+    volumes:
+      - ${PWD}/.data/geoip:/opt/geoip:ro
+    networks:
+      - service
+    restart: unless-stopped
+
+  valkey:
+    image: "valkey/valkey:8"
+    container_name: valkey
+    labels:
+      - traefik.enable=false
+    command:
+      - --databases 1
+      - --maxmemory 100Mb
+      - --maxmemory-policy volatile-ttl
+    volumes:
+      - ${PWD}/.data/valkey:/data
+    networks:
+      - service
+    restart: unless-stopped
+
+networks:
+  service:
