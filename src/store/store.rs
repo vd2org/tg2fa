@@ -42,7 +42,17 @@ pub enum UpdateResult {
 impl Store {
     pub async fn new(valkey: &Url, config: StoreConfig) -> Result<Self, Box<dyn std::error::Error>> {
         let valkey_config = Config::from_url(valkey.as_str())?;
-        let client = Builder::from_config(valkey_config).build()?;
+
+        // Create a builder so a reconnect policy can be applied.
+        let mut builder = Builder::from_config(valkey_config);
+        // Allow the client to retry the initial connection instead of failing fast.
+        builder.with_config(|c| c.fail_fast = false);
+        // Use an exponential backoff reconnect policy with unlimited attempts (0 = retry forever).
+        // min_delay = 100ms, max_delay = 30_000ms, base = 2
+        builder.set_policy(ReconnectPolicy::new_exponential(0, 100, 30_000, 2));
+
+        let client = builder.build()?;
+        // Initialize the client. With fail_fast=false and a reconnect policy this will retry until connected.
         client.init().await?;
 
         Ok(Self { client, config })
