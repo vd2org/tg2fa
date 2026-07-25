@@ -41,8 +41,7 @@ pub enum UpdateResult {
 
 impl Store {
     pub async fn new(valkey: &Url, config: StoreConfig) -> Result<Self, Box<dyn Error>> {
-        let valkey_config = Config::from_url(valkey.as_str())?;
-        let client = Builder::from_config(valkey_config)
+        let client = Builder::from_config(Config::from_url(valkey.as_ref())?)
             .set_policy(ReconnectPolicy::new_exponential(0, 100, 20_000, 2))
             .build()?;
         client.init().await?;
