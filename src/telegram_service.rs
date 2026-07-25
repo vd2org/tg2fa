@@ -6,7 +6,7 @@ use axum::http::{HeaderMap, StatusCode};
 use tgrs::{AnswerCallbackQuery, TelegramRequestResponse, Update, User, GET_ME};
 
 use crate::tools::{extract_header, token_urlsafe};
-use log::{error, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 use std::error::Error;
 use tgrs::SetWebhook;
 use tokio::net::TcpListener;
@@ -210,7 +210,7 @@ impl TelegramService {
                 };
 
                 match &resolution {
-                    Resolution::Allow(code) => info!(
+                    Resolution::Allow(code) => debug!(
                         "Authorization allowed for reference {} (chat={}, msg={}, code_len={})",
                         reference,
                         chat_id,
@@ -218,9 +218,9 @@ impl TelegramService {
                         code.len()
                     ),
                     Resolution::Deny => {
-                        info!("Authorization denied for reference {} (chat={}, msg={})", reference, chat_id, message_id)
+                        debug!("Authorization denied for reference {} (chat={}, msg={})", reference, chat_id, message_id)
                     }
-                    Resolution::Expired => info!(
+                    Resolution::Expired => debug!(
                         "Authorization expired for reference {} (chat={}, msg={})",
                         reference, chat_id, message_id
                     ),
@@ -229,7 +229,7 @@ impl TelegramService {
                 let edit = templates.update_request(chat_id, message_id, &resolution);
 
                 match edit.send(&telegram).await {
-                    Ok(_) => info!("Edited message {} in chat {} after processing callback", message_id, chat_id),
+                    Ok(_) => debug!("Edited message {} in chat {} after processing callback", message_id, chat_id),
                     Err(e) => error!(
                         "Failed to edit message {} in chat {} after update ({:?}): {}",
                         message_id, chat_id, status, e
