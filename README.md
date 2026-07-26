@@ -1,7 +1,7 @@
 # tg2fa - Vaultwarden + Telegram 2FA bridge
 
-**tg2fa** is a small service that acts as glue between Vaultwarden and Telegram, so Telegram can be used as the second factor.
-It receives login requests, sends an approval prompt to the use in Telegram's chat, and validates the user response.
+**tg2fa** is a small service that acts as glue between Vaultwarden and Telegram, allowing Telegram to be used as the second factor.
+It receives login requests, sends an approval prompt to the user in Telegram chat, and validates the user's response.
 
 ## Licensing
 
@@ -28,15 +28,15 @@ Dual-licensed under the **MIT** and **Apache License 2.0**. See [LICENSE](LICENS
 
 There is a small request example in the [test.http](test.http) file.
 
-## Used ports
+## Ports
 
-- `8080` - Telegram webhook bind address. Must be exposed to the internet (through Traefik or similar software).
+- `8080` - Telegram webhook bind address. It must be exposed to the internet through Traefik or similar software.
 - `9090` - Internal auth API bind address. Must never be exposed outside the internal network.
 
 ## Security
 
-The endpoint used for receive webhooks from Telegram is protected by `X-Telegram-Bot-Api-Secret-Token`,
-so basically no additional protection is needed.
+The endpoint used to receive Telegram webhooks is protected by `X-Telegram-Bot-Api-Secret-Token`,
+so no additional protection is typically needed.
 
 ## Vaultwarden
 
@@ -44,13 +44,13 @@ so basically no additional protection is needed.
 
 # Deployment
 
-The **tg2fa** service intended to be deployed using `docker compose` with TLS termination done by Traefik or similar software. 
-Here are examples for two cases: simple host deployment and deploying using Cloudflare Tunnel.
+The **tg2fa** service is intended to be deployed using `docker compose`, with TLS termination handled by Traefik or similar software.
+Below are examples for two cases: direct host deployment and deployment through Cloudflare Tunnel.
 
 All examples assume that you have Docker installed and running on your server.
 
-**NOTE**: Examples don't cover additional security-related topics, such as firewall setup, `fail2ban` and so on. 
-Administrators must address these topics by themselves.
+**Note:** These examples do not cover additional security topics such as firewall setup or `fail2ban`.
+Administrators must address those separately.
 
 ## Before the first start
 
@@ -58,10 +58,10 @@ Create a Telegram bot using [BotFather](https://t.me/BotFather) and get the toke
 
 ## Host deployment
 
-This method is useful when you have a dedicated server/vps. `80` and `443` ports must be open,
+This method is useful when you have a dedicated server or VPS. Ports `80` and `443` must be open,
 and A/AAAA records of your domain should point to the server's IP.
 
-Traefik will do TLS termination automatically. Certificates will be obtained from Let's encrypt using `tlsChallage`.
+Traefik handles TLS termination automatically. Certificates are obtained from Let's Encrypt using the `tlsChallenge` ACME challenge.
 
 Create environment files using provided templates:
 
@@ -73,7 +73,7 @@ cp docker/host/vaultwarden.env.template docker/host/vaultwarden.env
 
 Fill templates with appropriate values.
 
-Run the whole service using docker:
+Start the full stack with Docker:
 
 ```shell
 docker compose -f docker/host/compose.yaml up -d
@@ -85,30 +85,30 @@ Verify that all services are running:
 docker compose -f docker/host/compose.yaml ps
 ```
 
-You should see the following services up and running:
+You should see the following services running:
 
 - `traefik`
 - `tg2fa`
 - `vaultwarden`
 - `valkey`
 
-Use the following command to observe logs:
+Use the following command to view logs:
 
 ```shell
 docker compose -f docker/host/compose.yaml logs -f
 ```
 
-Databases and other data are stored in `docker/host/.data/` directory.
+Databases and other data are stored in the `docker/host/.data/` directory.
 
-To verify if your bot is working as expected, write anything to it. The bot should reply to you with your `user_id`.
+To verify that your bot is working as expected, send it any message. The bot should reply with your `user_id`.
 
 ## Deploying using Cloudflare Tunnel
 
-This service is useful if you cannot or don't want to expose the service directly. 
-Instead, Cloudflare Tunnel will be used to expose your service.
-For example, you can set up vaultwarden on your home Raspberry Pi computer.
+This method is useful if you cannot or do not want to expose the service directly.
+Instead, Cloudflare Tunnel is used to expose it.
+For example, you can run Vaultwarden on a home Raspberry Pi.
 
-Please set up Cloudflare Tunnel first.
+Set up Cloudflare Tunnel first.
 
 Create environment files using provided templates:
 
@@ -121,7 +121,7 @@ cp docker/cloudflare-tunnel/cloudflared.env.template docker/cloudflare-tunnel/cl
 
 Fill templates with appropriate values.
 
-Run the whole service using docker:
+Start the full stack with Docker:
 
 ```shell
 docker compose -f docker/cloudflare-tunnel/compose.yaml up -d
@@ -133,7 +133,7 @@ Verify that all services are running:
 docker compose -f docker/cloudflare-tunnel/compose.yaml ps
 ```
 
-You should see the following services up and running:
+You should see the following services running:
 
 - `cloudflared`
 - `traefik`
@@ -141,19 +141,19 @@ You should see the following services up and running:
 - `vaultwarden`
 - `valkey`
 
-Use the following command to observe logs:
+Use the following command to view logs:
 
 ```shell
 docker compose -f docker/cloudflare-tunnel/compose.yaml logs -f
 ```
 
-Databases and other data are stored in `docker/cloudflare-tunnel/.data/` directory.
+Databases and other data are stored in the `docker/cloudflare-tunnel/.data/` directory.
 
-To verify if your bot is working as expected, write anything to it. The bot should reply to you with your `user_id`.
+To verify that your bot is working as expected, send it any message. The bot should reply with your `user_id`.
 
 ## MaxMind GeoLite2 setup (optional)
 
-GeoIP is optional, but if you want country/city/ASN details in Telegram messages, 
+GeoIP is optional, but if you want country/city/ASN details in Telegram messages,
 place the MaxMind Lite databases into `.data/geoip/`.
 
 1. Create a free MaxMind account.
