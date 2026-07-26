@@ -30,7 +30,6 @@ while `tg2fa`, `vaultwarden`, and `valkey` stay on the internal Docker network.
 | Variable                    | Required | Default                  | Meaning                                               |
 |-----------------------------|----------|--------------------------|-------------------------------------------------------|
 | `TELEGRAM_BOT_TOKEN`        | yes      | -                        | Telegram bot token                                    |
-| `TELEGRAM_CHAT`             | yes      | -                        | Telegram user/chat id; message the bot once to get it |
 | `TELEGRAM_HOST_URL`         | yes      | -                        | Public HTTPS webhook URL served through Traefik       |
 | `VALKEY_SERVER`             | no       | `redis://127.0.0.1:6379` | Valkey / Redis connection URL                         |
 | `CONFIG_REQUEST_EXPIRATION` | no       | `5m`                     | Pending request lifetime                              |
