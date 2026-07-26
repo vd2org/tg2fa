@@ -1,0 +1,5 @@
+.data/
+.env
+tg2fa.env
+vaultwarden.env
+cloudflared.env

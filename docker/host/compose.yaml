@@ -15,8 +15,8 @@ services:
       - --providers.docker.exposedByDefault=false
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.letsencrypt.acme.tlsChallenge.tls=true
-      - --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.tlsChallenge=true
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
       - --certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json
     environment:
       ACME_AGREE: "true"
@@ -30,14 +30,14 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - ${PWD}/.data/acme:/etc/traefik/acme
+      - .data/acme:/etc/traefik/acme
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - service
     restart: unless-stopped
 
   vaultwarden:
-    image: vaultwarden/server:1.36.0
+    image: ghcr.io/vd2org/vaultwardenext2fa:1.37.0-alpine
     container_name: vaultwarden
     labels:
       - traefik.enable=true
@@ -48,7 +48,7 @@ services:
       - traefik.http.routers.vaultwarden.entrypoints=websecure
       - traefik.http.routers.vaultwarden.tls.certresolver=letsencrypt
     env_file:
-      - ${PWD}/.data/vaultwarden.env
+      - vaultwarden.env
     environment:
       DOMAIN: "https://${DOMAIN}/"
       ROCKET_PORT: "8080"
@@ -56,7 +56,7 @@ services:
       EXT2FA_URL: "http://tg2fa:9090/"
       HTTP_REQUEST_BLOCK_NON_GLOBAL_IPS: "false"
     volumes:
-      - ${PWD}/.data/vaultwarden:/data
+      - .data/vaultwarden:/data
     networks:
       - service
     restart: unless-stopped
@@ -64,7 +64,7 @@ services:
   tg2fa:
     container_name: tg2fa
     build:
-      context: ./
+      context: ${PWD}/
       dockerfile: Dockerfile
     labels:
       - traefik.enable=true
@@ -75,12 +75,12 @@ services:
       - traefik.http.routers.tg2fa.entrypoints=websecure
       - traefik.http.routers.tg2fa.tls.certresolver=letsencrypt
     env_file:
-      - ${PWD}/.data/tg2fa.env
+      - tg2fa.env
     environment:
       TELEGRAM_HOST_URL: "https://${DOMAIN}/_tg2fa/"
       VALKEY_SERVER: "redis://valkey:6379"
     volumes:
-      - ${PWD}/.data/geoip:/opt/geoip:ro
+      - .data/geoip:/opt/geoip:ro
     networks:
       - service
     restart: unless-stopped
@@ -95,7 +95,7 @@ services:
       - --maxmemory 100Mb
       - --maxmemory-policy volatile-ttl
     volumes:
-      - ${PWD}/.data/valkey:/data
+      - .data/valkey:/data
     networks:
       - service
     restart: unless-stopped

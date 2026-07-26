@@ -1,0 +1,104 @@
+services:
+
+  cloudflared:
+    image: cloudflare/cloudflared
+    container_name: cloudflared
+    labels:
+      - traefik.enable=false
+    env_file:
+      - cloudflared.env
+    command:
+      - tunnel
+      - --no-autoupdate
+      - run
+    networks:
+      - service
+    restart: unless-stopped
+
+  traefik:
+    image: "traefik:3.7"
+    container_name: traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.buff.buffering.maxRequestBodyBytes=10485760 # 10 MiB
+      - traefik.http.middlewares.buff.buffering.memRequestBodyBytes=2097152 # 2 MiB
+      - traefik.http.middlewares.buff.buffering.maxResponseBodyBytes=10485760 # 10 MiB
+      - traefik.http.middlewares.buff.buffering.memResponseBodyBytes=2097152 # 2 MiB
+      - traefik.http.middlewares.buff.buffering.retryExpression=IsNetworkError() && Attempts() < 2
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.web.address=:8080
+      - --entrypoints.web.forwardedHeaders.trustedIPs=172.16.0.0/12
+      - --entrypoints.web.forwardedHeaders.notAppendXForwardedFor=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - service
+    restart: unless-stopped
+
+  vaultwarden:
+    image: ghcr.io/vd2org/vaultwardenext2fa:1.37.0-alpine
+    container_name: vaultwarden
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.vaultwarden.rule=Host(`${DOMAIN}`) && PathPrefix(`/`)
+      - traefik.http.routers.vaultwarden.middlewares=buff@docker
+      - traefik.http.routers.vaultwarden.service=vaultwarden
+      - traefik.http.services.vaultwarden.loadbalancer.server.port=8080
+      - traefik.http.routers.vaultwarden.entrypoints=web
+    env_file:
+      - vaultwarden.env
+    environment:
+      DOMAIN: "https://${DOMAIN}/"
+      ROCKET_PORT: "8080"
+      ENABLE_EXT2FA: "true"
+      EXT2FA_URL: "http://tg2fa:9090/"
+      HTTP_REQUEST_BLOCK_NON_GLOBAL_IPS: "false"
+      IP_HEADER: "CF-Connecting-IP"
+    volumes:
+      - .data/vaultwarden:/data
+    networks:
+      - service
+    restart: unless-stopped
+
+  tg2fa:
+    container_name: tg2fa
+    build:
+      context: ${PWD}/
+      dockerfile: Dockerfile
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tg2fa.rule=Host(`${DOMAIN}`) && PathPrefix(`/_tg2fa`)
+      - traefik.http.routers.tg2fa.middlewares=buff@docker
+      - traefik.http.routers.tg2fa.service=tg2fa
+      - traefik.http.services.tg2fa.loadbalancer.server.port=8080
+      - traefik.http.routers.tg2fa.entrypoints=web
+    env_file:
+      - tg2fa.env
+    environment:
+      TELEGRAM_HOST_URL: "https://${DOMAIN}/_tg2fa/"
+      VALKEY_SERVER: "redis://valkey:6379"
+    volumes:
+      - .data/geoip:/opt/geoip:ro
+    networks:
+      - service
+    restart: unless-stopped
+
+  valkey:
+    image: "valkey/valkey:8"
+    container_name: valkey
+    labels:
+      - traefik.enable=false
+    command:
+      - --databases 1
+      - --maxmemory 100Mb
+      - --maxmemory-policy volatile-ttl
+    volumes:
+      - .data/valkey:/data
+    networks:
+      - service
+    restart: unless-stopped
+
+networks:
+  service:
