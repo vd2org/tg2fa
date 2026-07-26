@@ -79,11 +79,11 @@ impl AuthService {
                 .route("/validate", post(Self::validate_handler))
                 .with_state(self.clone()),
         )
-        .with_graceful_shutdown(async move {
-            shutdown_token.cancelled().await;
-        })
-        .await
-        .inspect_err(|e| error!("Telegram server error: {}", e))?;
+            .with_graceful_shutdown(async move {
+                shutdown_token.cancelled().await;
+            })
+            .await
+            .inspect_err(|e| error!("Telegram server error: {}", e))?;
 
         Ok(())
     }

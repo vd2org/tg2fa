@@ -54,7 +54,7 @@ async fn main() -> ExitCode {
         let telegram_service =
             TelegramService::new(store.clone(), templates.clone(), &config.telegram_bot_token, None).await?;
         telegram_service.setup_webhook(&config.telegram_host_url).await?;
-    info!("Telegram webhook for @{} set to {}", telegram_service.username(), config.telegram_host_url);
+        info!("Telegram webhook for @{} set to {}", telegram_service.username(), config.telegram_host_url);
         Ok::<TelegramService, Box<dyn Error>>(telegram_service)
     }
         .await

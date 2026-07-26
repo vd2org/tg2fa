@@ -1,7 +1,7 @@
+use log::info;
 use maxminddb::{path, Mmap, Reader};
 use std::net::IpAddr;
 use std::path::PathBuf;
-use log::info;
 
 pub struct Geoip {
     city_db: Reader<Mmap>,
