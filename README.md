@@ -30,7 +30,7 @@ There is a small request example in the [test.http](test.http) file.
 
 ## Used ports
 
-- `8080` - Telegram webhook bind address. Must be exposed to the internet.
+- `8080` - Telegram webhook bind address. Must be exposed to the internet (through Traefik or similar software).
 - `9090` - Internal auth API bind address. Must never be exposed outside the internal network.
 
 ## Security

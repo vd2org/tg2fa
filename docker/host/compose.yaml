@@ -18,8 +18,6 @@ services:
       - --certificatesresolvers.letsencrypt.acme.tlsChallenge=true
       - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
       - --certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json
-    environment:
-      ACME_AGREE: "true"
     ports:
       - target: 80
         published: 80
