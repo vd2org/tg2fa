@@ -40,12 +40,71 @@ so no additional protection is typically needed.
 
 ## Vaultwarden
 
-**TODO**
+This setup requires a modified Vaultwarden build. Source changes are available [here](https://github.com/vd2org/vaultwarden).
+
+Prebuilt Docker images are available [here](https://github.com/users/vd2org/packages/container/package/vaultwardenext2fa).
+The deployment examples below use this image.
+
+```shell
+docker pull ghcr.io/vd2org/vaultwardenext2fa:1.37.0-alpine
+```
+
+Configure Vaultwarden with the following settings:
+
+| Environment variable | Type    | Default                  | Meaning                           |
+|----------------------|---------|--------------------------|-----------------------------------|
+| `ENABLE_EXT2FA`      | bool    | `false`                  | Enable External 2FA support       |
+| `EXT2FA_URL`         | string  | `http://127.0.0.1:9090/` | URL of the 2FA server, e.g. tg2fa |
+
+These settings can be applied either through environment variables or through the admin panel.
+
+To allow Vaultwarden to call internal addresses such as **tg2fa**, set `HTTP_REQUEST_BLOCK_NON_GLOBAL_IPS` to `false`.
+
+### Database setup
+
+There is currently no GUI support for this, so you must enable **External 2fa** in the database for each user.
+
+**Note:** If you use `sqlite`, stop the Vaultwarden instance first to avoid database corruption.
+
+List users:
+
+```sqlite
+SELECT uuid,email,name FROM users;
+```
+
+```text
+10126234-85ba-4700-bd65-89f37e607462|spock@example.com|Spock
+```
+
+Generate UUID values for the new `twofactor` rows:
+
+```shell
+python3 -c "import uuid; [print(uuid.uuid4()) for _ in range(10)]"
+```
+
+Insert External 2FA entries:
+
+**Note:** The example below assumes that `1234567890` is your Telegram `user_id`.
+
+```sqlite
+INSERT INTO twofactor 
+    (uuid, user_uuid, atype, enabled, data, last_used) 
+VALUES 
+    ('caf6bf5a-63dd-4dd4-8bb3-a526f749327d', '10126234-85ba-4700-bd65-89f37e607462', 900, 1, '{"id": 1234567890}', 0),
+```
+
+### Client behavior
+
+Vaultwarden clients do not support a custom 2FA mechanism, so External 2FA is implemented by reusing the YubiKey flow.
+This means you cannot use both **YubiKey** and **External 2FA** at the same time. If YubiKey is configured,
+it will be ignored and the **External 2FA** code will be required to log in.
+
+**TBD**: Registration API and Web Vault support.
 
 # Deployment
 
 The **tg2fa** service is intended to be deployed using `docker compose`, with TLS termination handled by Traefik or similar software.
-Below are examples for two cases: direct host deployment and deployment through Cloudflare Tunnel.
+Below are examples of two cases: direct host deployment and deployment through Cloudflare Tunnel.
 
 All examples assume that you have Docker installed and running on your server.
 
