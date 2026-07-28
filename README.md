@@ -1,4 +1,4 @@
-# tg2fa - Vaultwarden + Telegram 2FA bridge
+# tg2fa - Vaultwarden + Telegram 2fa bridge
 
 **tg2fa** is a small service that acts as glue between Vaultwarden and Telegram, allowing Telegram to be used as the second factor.
 It receives login requests, sends an approval prompt to the user in Telegram chat, and validates the user's response.
@@ -53,8 +53,8 @@ Configure Vaultwarden with the following settings:
 
 | Environment variable | Type    | Default                  | Meaning                           |
 |----------------------|---------|--------------------------|-----------------------------------|
-| `ENABLE_EXT2FA`      | bool    | `false`                  | Enable External 2FA support       |
-| `EXT2FA_URL`         | string  | `http://127.0.0.1:9090/` | URL of the 2FA server, e.g. tg2fa |
+| `ENABLE_EXT2FA`      | bool    | `false`                  | Enable External 2fa support       |
+| `EXT2FA_URL`         | string  | `http://127.0.0.1:9090/` | URL of the 2fa server, e.g. tg2fa |
 
 These settings can be applied either through environment variables or through the admin panel.
 
@@ -82,7 +82,7 @@ Generate UUID values for the new `twofactor` rows:
 python3 -c "import uuid; [print(uuid.uuid4()) for _ in range(10)]"
 ```
 
-Insert External 2FA entries:
+Insert External 2fa entries:
 
 **Note:** The example below assumes that `1234567890` is your Telegram `user_id`.
 
@@ -90,14 +90,14 @@ Insert External 2FA entries:
 INSERT INTO twofactor 
     (uuid, user_uuid, atype, enabled, data, last_used) 
 VALUES 
-    ('caf6bf5a-63dd-4dd4-8bb3-a526f749327d', '10126234-85ba-4700-bd65-89f37e607462', 900, 1, '{"id": 1234567890}', 0),
+    ('caf6bf5a-63dd-4dd4-8bb3-a526f749327d', '10126234-85ba-4700-bd65-89f37e607462', 900, 1, '{"id": 1234567890}', 0)
 ```
 
 ### Client behavior
 
-Vaultwarden clients do not support a custom 2FA mechanism, so External 2FA is implemented by reusing the YubiKey flow.
-This means you cannot use both **YubiKey** and **External 2FA** at the same time. If YubiKey is configured,
-it will be ignored and the **External 2FA** code will be required to log in.
+Vaultwarden clients do not support a custom 2fa mechanism, so **External 2fa** is implemented by reusing the YubiKey flow.
+This means you cannot use both **YubiKey** and **External 2fa** at the same time. If YubiKey is configured,
+it will be ignored and the **External 2fa** code will be required to log in.
 
 **TBD**: Registration API and Web Vault support.
 
