@@ -90,7 +90,7 @@ Insert External 2fa entries:
 INSERT INTO twofactor 
     (uuid, user_uuid, atype, enabled, data, last_used) 
 VALUES 
-    ('caf6bf5a-63dd-4dd4-8bb3-a526f749327d', '10126234-85ba-4700-bd65-89f37e607462', 900, 1, '{"id": 1234567890}', 0)
+    ('caf6bf5a-63dd-4dd4-8bb3-a526f749327d', '10126234-85ba-4700-bd65-89f37e607462', 900, 1, '{"id": 1234567890}', 0);
 ```
 
 ### Client behavior
