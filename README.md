@@ -42,11 +42,11 @@ so no additional protection is typically needed.
 
 This setup requires a modified Vaultwarden build. Source changes are available [here](https://github.com/vd2org/vaultwarden).
 
-Prebuilt Docker images are available [here](https://github.com/users/vd2org/packages/container/package/vaultwardenext2fa).
+Prebuilt Docker images are available [here](https://github.com/users/vd2org/packages/container/package/vaultwarden).
 The deployment examples below use this image.
 
 ```shell
-docker pull ghcr.io/vd2org/vaultwardenext2fa:1.37.0-alpine
+docker pull ghcr.io/vd2org/vaultwarden:1.37.1e-alpine
 ```
 
 Configure Vaultwarden with the following settings:
