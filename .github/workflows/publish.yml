@@ -106,8 +106,8 @@ jobs:
       - name: Combine per-architecture images
         shell: bash
         run: |
-          docker buildx imagetools inspect "${IMAGE}:${GITHUB_SHA}-amd64"
-          docker buildx imagetools inspect "${IMAGE}:${GITHUB_SHA}-arm64"
+          docker buildx imagetools inspect "${IMAGE}:build-${GITHUB_SHA}-amd64"
+          docker buildx imagetools inspect "${IMAGE}:build-${GITHUB_SHA}-arm64"
           docker buildx imagetools create \
             --tag "${IMAGE}:${FINAL_TAG}" \
             "${IMAGE}:build-${GITHUB_SHA}-amd64" \
