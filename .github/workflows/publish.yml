@@ -142,3 +142,10 @@ jobs:
 
           docker buildx imagetools create "${args[@]}"
           docker buildx imagetools inspect "${IMAGE}:${FINAL_TAG}"
+
+      - name: Cleanup
+        uses: step-security/ghcr-cleanup-action@v1
+        with:
+          delete-untagged: true
+          delete-ghost-images: true
+          delete-partial-images: true
