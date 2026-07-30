@@ -78,10 +78,10 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: ${{ matrix.platform }}
-          cache-from: type=gha,scope=tg2fa-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=tg2fa-${{ matrix.arch }}
+          cache-from: type=gha,scope=${{ github.event.repository.name }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ github.event.repository.name }}-${{ matrix.arch }}
           push: true
-          tags: ${{ needs.prepare.outputs.image }}:${{ github.sha }}-${{ matrix.arch }}
+          tags: ${{ needs.prepare.outputs.image }}:build-${{ github.sha }}-${{ matrix.arch }}
 
   publish:
     name: Publish multi-arch image
@@ -110,6 +110,6 @@ jobs:
           docker buildx imagetools inspect "${IMAGE}:${GITHUB_SHA}-arm64"
           docker buildx imagetools create \
             --tag "${IMAGE}:${FINAL_TAG}" \
-            "${IMAGE}:${GITHUB_SHA}-amd64" \
-            "${IMAGE}:${GITHUB_SHA}-arm64"
+            "${IMAGE}:build-${GITHUB_SHA}-amd64" \
+            "${IMAGE}:build-${GITHUB_SHA}-arm64"
           docker buildx imagetools inspect "${IMAGE}:${FINAL_TAG}"
