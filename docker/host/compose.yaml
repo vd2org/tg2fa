@@ -35,7 +35,7 @@ services:
     restart: unless-stopped
 
   vaultwarden:
-    image: ghcr.io/vd2org/vaultwarden:1.37.1e-alpine
+    image: ghcr.io/vd2org/vaultwarden:1.37.4e-alpine
     container_name: vaultwarden
     labels:
       - traefik.enable=true
